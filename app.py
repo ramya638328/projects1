@@ -1,29 +1,29 @@
 import streamlit as st
 import pickle
 import numpy as np
-import os
-
-MODEL_PATH = "Diabetes_Prediction.pkl"
-
-# Check if model exists
-if not os.path.exists(MODEL_PATH):
-    st.error(f"Model file not found: {MODEL_PATH}. Upload it in the same folder as app.py.")
-    st.stop()
-
-# Load model
-with open(MODEL_PATH, "rb") as f:
-    model = pickle.load(f)
 
 st.title("Diabetes Prediction App")
+st.write("Upload your trained model and enter patient details to predict diabetes.")
 
-age = st.number_input("Enter Age:", min_value=1, max_value=120, value=30)
-mass = st.number_input("Enter Mass (BMI):", min_value=1, max_value=100, value=25)
-insulin = st.number_input("Enter Insulin Level:", min_value=0, max_value=1000, value=100)
-plasma = st.number_input("Enter Plasma Level:", min_value=0, max_value=300, value=120)
+# Upload the trained model file
+uploaded_file = st.file_uploader("Upload Diabetes_Prediction.pkl", type=["pkl"])
 
-if st.button("Predict"):
-    pred = model.predict(np.array([[age, mass, insulin, plasma]]))
-    if pred[0] == 1:
-        st.error("The patient is likely to have diabetes.")
-    else:
-        st.success("The patient is not likely to have diabetes.")
+if uploaded_file is not None:
+    # Load the model
+    model = pickle.load(uploaded_file)
+    
+    st.subheader("Enter Patient Details:")
+    age = st.number_input("Age:", min_value=1, max_value=120, value=30)
+    mass = st.number_input("Mass (BMI):", min_value=1, max_value=100, value=25)
+    insulin = st.number_input("Insulin Level:", min_value=0, max_value=1000, value=100)
+    plasma = st.number_input("Plasma Level:", min_value=0, max_value=300, value=120)
+
+    # Prediction
+    if st.button("Predict"):
+        pred = model.predict(np.array([[age, mass, insulin, plasma]]))
+        if pred[0] == 1:
+            st.error("The patient is likely to have diabetes.")
+        else:
+            st.success("The patient is not likely to have diabetes.")
+else:
+    st.warning("Please upload the trained model file (.pkl) to continue.")
